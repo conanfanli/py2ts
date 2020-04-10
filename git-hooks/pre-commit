@@ -1,0 +1,4 @@
+#!/bin/sh
+m2r README.md --overwrite
+git add README.rst
+exit 0
