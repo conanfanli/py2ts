@@ -2,12 +2,12 @@ version: 2
 
 jobs:
   build:  # required for runs that don't use workflows
-  docker:
-    - image: circleci/python3.8.1
-  steps:
-    - checkout
-    - run:
-        command: pip install -r dev-requirements.txt
-    - run:
-        command: make test
+    docker:
+      - image: circleci/python3.8.1
+    steps:
+      - checkout
+      - run:
+          command: pip install -r dev-requirements.txt
+      - run:
+          command: make test
 
