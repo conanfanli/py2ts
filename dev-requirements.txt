@@ -1,0 +1,12 @@
+ipython
+mypy
+twine
+pytest
+pytest-cov
+flake8
+codecov
+ipdb
+isort
+black
+
+m2r
