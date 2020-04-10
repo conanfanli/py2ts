@@ -1,0 +1,10 @@
+include *requirements.txt
+include *.md
+
+include py2ts/*.pyi
+recursive-include py2ts *.pyi
+
+include py2ts/py.typed
+recursive-include py2ts py.typed
+
+
