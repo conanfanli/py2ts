@@ -12,21 +12,21 @@ with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="pytypegen",
-    version="1.0.4",
+    name="py2ts",
+    version="0.0.1",
     description="Python type code generator",
     long_description=long_description,
-    url="https://github.com/conanfanli/pytypegen",
+    url="https://github.com/conanfanli/py2ts",
     packages=find_packages(exclude=["tests"]),
     include_package_data=True,
-    python_requires="~=3.7",
+    python_requires="~=3.8",
     extras_require={"dev": ["ipython", "mypy"]},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
-    keywords="Python,Types,Dataclass,Code Generation",
+    keywords="Python,TypeScript,Dataclass,Code Generation",
     author="Conan Li",
     author_email="conanlics@gmail.com",
     license="MIT",
