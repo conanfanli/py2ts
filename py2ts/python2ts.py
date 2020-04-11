@@ -4,7 +4,7 @@ from dataclasses import MISSING, Field, is_dataclass
 import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Dict, List, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 from typing import ForwardRef  # type: ignore
 
 from .exceptions import UnknowFieldType
@@ -14,7 +14,7 @@ class Undefined:
     pass
 
 
-def is_subclass(obj, cls):
+def is_subclass(obj, cls) -> Optional[bool]:
     try:
         return issubclass(obj, cls)
     except TypeError:
