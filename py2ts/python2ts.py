@@ -14,7 +14,12 @@ class Undefined:
     pass
 
 
-def is_subclass(obj, cls) -> Optional[bool]:
+def is_none_type(tp: type) -> bool:
+    return getattr(tp, "__name__", None) == "NoneType"
+
+
+def check_is_subclass(obj, cls) -> Optional[bool]:
+    """Call issubclass without raising exceptions."""
     try:
         return issubclass(obj, cls)
     except TypeError:
@@ -56,7 +61,7 @@ class Node:
         if is_dataclass(schema):
             self.is_dataclass = True
             self.is_enum = False
-        elif issubclass(schema, Enum):
+        elif check_is_subclass(schema, Enum):
             self.is_dataclass = False
             self.is_enum = True
         else:
@@ -90,7 +95,7 @@ class Node:
 
 
 def get_field_dependencies(typing_type: type) -> List[Node]:
-    if is_dataclass(typing_type) or is_subclass(typing_type, Enum):
+    if is_dataclass(typing_type) or check_is_subclass(typing_type, Enum):
         return [Node(typing_type)]
 
     if getattr(typing_type, "__origin__", None) in [list, List]:
@@ -98,7 +103,7 @@ def get_field_dependencies(typing_type: type) -> List[Node]:
         try:
             return (
                 [Node(args[0])]
-                if is_dataclass(args[0]) or is_subclass(args[0], Enum)
+                if is_dataclass(args[0]) or check_is_subclass(args[0], Enum)
                 else get_field_dependencies(args[0])
             )
         except TypeError as e:
@@ -106,7 +111,11 @@ def get_field_dependencies(typing_type: type) -> List[Node]:
 
     if getattr(typing_type, "__origin__", None) == Union:
         args = getattr(typing_type, "__args__")
-        return [Node(arg) for arg in args if is_dataclass(arg) or issubclass(arg, Enum)]
+        return [
+            Node(arg)
+            for arg in args
+            if is_dataclass(arg) or check_is_subclass(arg, Enum)
+        ]
 
     return []
 

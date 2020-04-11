@@ -16,6 +16,7 @@ class EnumFruit(Enum):
 class NestedSchema:
     string_field: str
     nullable_datetime_field: Optional[datetime]
+    recursively_nested_field: Optional["NestedSchema"]
 
 
 @dataclass
@@ -24,6 +25,7 @@ class ComplexSchema:
     nullable_decimal_field: Optional[int]
     nullable_enum_field: Optional[EnumFruit]
     nullable_nested_field: Optional[NestedSchema]
+    nested_list_field: List[NestedSchema]
 
 
 class Enum2TsTestCase(unittest.TestCase):
@@ -46,5 +48,5 @@ class Enum2TsTestCase(unittest.TestCase):
         for path, node in schemas2typescript([ComplexSchema]).items():
             blocks.append(node.to_typescript())
 
-        self.updateSnapshot(blocks)
-        # assert "\n".join(blocks) == self.read_snapshot()
+        # self.updateSnapshot(blocks)
+        assert "\n".join(blocks) == self.read_snapshot()
