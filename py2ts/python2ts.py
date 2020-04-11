@@ -135,7 +135,7 @@ def python_type_to_typescript(typing_type: type) -> str:
 
     if getattr(typing_type, "__origin__", None) == Union:
         args = getattr(typing_type, "__args__")
-        return "|".join(python_type_to_typescript(arg) for arg in args)
+        return " | ".join(python_type_to_typescript(arg) for arg in args)
 
     if isinstance(typing_type, ForwardRef):
         return typing_type.__forward_arg__
@@ -148,7 +148,7 @@ def python_type_to_typescript(typing_type: type) -> str:
 
 def field_to_typescript(field: Field) -> str:
     try:
-        return python_type_to_typescript(field.type)
+        return python_type_to_typescript(field.type) + ";"
     except UnknowFieldType as e:
         raise UnknowFieldType(f"{field.name}: {e}")
 

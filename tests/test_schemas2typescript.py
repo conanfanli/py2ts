@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from pathlib import Path
 from typing import List, Optional
 import unittest
 
@@ -9,6 +8,7 @@ from py2ts.python2ts import schemas2typescript
 @dataclass
 class ComplexSchema:
     nullable_int_field: Optional[int]
+    nullable_decimal_field: Optional[int]
 
 
 class Enum2TsTestCase(unittest.TestCase):
@@ -19,7 +19,7 @@ class Enum2TsTestCase(unittest.TestCase):
 
     def read_snapshot(self) -> str:
         with open(self.snapshot_path) as f:
-            return f.read()
+            return f.read().strip()
 
     def updateSnapshot(self, blocks: List[str]) -> None:
         """Use this when updating snapshot."""
