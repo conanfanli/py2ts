@@ -1,14 +1,21 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import List, Optional
 import unittest
 
 from py2ts.python2ts import schemas2typescript
 
 
+class EnumFruit(Enum):
+    APPLE = "APPLE"
+    ORANGE = "ORANGE"
+
+
 @dataclass
 class ComplexSchema:
     nullable_int_field: Optional[int]
     nullable_decimal_field: Optional[int]
+    nullable_enum_fields: Optional[EnumFruit]
 
 
 class Enum2TsTestCase(unittest.TestCase):
@@ -31,4 +38,5 @@ class Enum2TsTestCase(unittest.TestCase):
         for path, node in schemas2typescript([ComplexSchema]).items():
             blocks.append(node.to_typescript())
 
+        # self.updateSnapshot(blocks)
         assert "\n".join(blocks) == self.read_snapshot()
