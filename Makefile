@@ -29,3 +29,8 @@ generate-stubs: clean
 	find . -type f -name '*.pyi' | xargs rm
 	stubgen py2ts/ -o .
 
+.PHONY: lint
+lint:
+	black . --check
+	mypy .
+	isort -c
