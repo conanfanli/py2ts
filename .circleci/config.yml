@@ -9,7 +9,7 @@ jobs:
       - run:
           command: pip install -r dev-requirements.txt
       - run:
-          command: make test
+          command: make coverage
       - run:
           name: Upload coverage to codecov
           command: codecov -t 0a652abc-deea-4a9b-a31f-e0c564f121e1
