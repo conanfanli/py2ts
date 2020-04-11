@@ -14,10 +14,6 @@ class Undefined:
     pass
 
 
-def is_none_type(tp: type) -> bool:
-    return getattr(tp, "__name__", None) == "NoneType"
-
-
 def check_is_subclass(obj, cls) -> Optional[bool]:
     """Call issubclass without raising exceptions."""
     try:
