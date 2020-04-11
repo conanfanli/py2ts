@@ -12,5 +12,5 @@ jobs:
           command: make test
       - run:
           name: Upload coverage to codecov
-          command: codecov -t 0a652abc-deea-4a9b-a31f-e0c564f121e1 -s /tmp/test-reports/coverage
+          command: codecov -t 0a652abc-deea-4a9b-a31f-e0c564f121e1
 
