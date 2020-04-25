@@ -61,7 +61,6 @@ Create a schema with Python ``dataclass``\ :
    for path, node in schemas2typescript([ComplexSchema]).items():
        blocks.append(node.to_typescript())
 
-   # self.updateSnapshot(blocks)
    print("\n".join(blocks) == self.read_snapshot())
 
 The output is:
