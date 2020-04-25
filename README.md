@@ -45,7 +45,7 @@ blocks = []
 for path, node in schemas2typescript([ComplexSchema]).items():
     blocks.append(node.to_typescript())
 
-print("\n".join(blocks) == self.read_snapshot())
+print("\n".join(blocks))
 ```
 The output is:
 ```typescript
