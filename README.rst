@@ -35,4 +35,52 @@ Usage
 
 Create a schema with Python ``dataclass``\ :
 
-``python``
+.. code-block:: python
+
+   class EnumFruit(Enum):
+       APPLE = "APPLE"
+       ORANGE = "ORANGE"
+
+
+   @dataclass
+   class NestedSchema:
+       string_field: str
+       nullable_datetime_field: Optional[datetime]
+       recursively_nested_field: Optional["NestedSchema"]
+
+
+   @dataclass
+   class ComplexSchema:
+       nullable_int_field: Optional[int]
+       nullable_decimal_field: Optional[int]
+       nullable_enum_field: Optional[EnumFruit]
+       nullable_nested_field: Optional[NestedSchema]
+       nested_list_field: List[NestedSchema]
+
+   blocks = []
+   for path, node in schemas2typescript([ComplexSchema]).items():
+       blocks.append(node.to_typescript())
+
+   # self.updateSnapshot(blocks)
+   print("\n".join(blocks) == self.read_snapshot())
+
+The output is:
+
+.. code-block:: typescript
+
+   export enum EnumFruit {
+     APPLE = 'APPLE',
+     ORANGE = 'ORANGE'
+   }
+   export interface NestedSchema {
+     string_field: string;
+     nullable_datetime_field: string | null;
+     recursively_nested_field: NestedSchema | null;
+   }
+   export interface ComplexSchema {
+     nullable_int_field: number | null;
+     nullable_decimal_field: number | null;
+     nullable_enum_field: EnumFruit | null;
+     nullable_nested_field: NestedSchema | null;
+     nested_list_field: Array<NestedSchema>;
+   }
