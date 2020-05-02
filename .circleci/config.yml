@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  pypi: pennlabs/pypi-tools@0.0.3
+
 jobs:
   test:  # required for runs that don't use workflows
     docker:
@@ -26,7 +29,7 @@ workflows:
   build:
     jobs:
       - test
-      - publish:
+      - pypi/publish:
           requires:
             - test
           filters:
