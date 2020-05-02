@@ -26,3 +26,9 @@ workflows:
   build:
     jobs:
       - test
+      - publish:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
