@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 jobs:
   test:  # required for runs that don't use workflows
@@ -22,9 +22,7 @@ jobs:
           command: make publish
 
 workflows:
+  version: 2.1
   build:
     jobs:
       - test
-      - publish:
-          filter:
-            only: master
