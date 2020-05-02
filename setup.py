@@ -13,7 +13,8 @@ with open(path.join(here, "README.rst"), encoding="utf-8") as f:
 
 setup(
     name="py2ts",
-    version="0.0.1",
+    version="0.0.2",
+    scripts=["generate_service_registry.py"],
     description="Python type code generator",
     long_description=long_description,
     url="https://github.com/conanfanli/py2ts",
