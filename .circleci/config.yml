@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  build:  # required for runs that don't use workflows
+  test:  # required for runs that don't use workflows
     docker:
       - image: circleci/python:3.8.1
     steps:
@@ -16,11 +16,15 @@ jobs:
   publish:
     docker:
       - image: circleci/python:3.8.1
-    filters:
-      branches:
-        only: master
     steps:
       - checkout
       - run:
           command: make publish
 
+workflows:
+  build:
+    jobs:
+      - test
+      - publish:
+          filter:
+            only: master
