@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  build:  # required for runs that don't use workflows
+  test:  # required for runs that don't use workflows
     docker:
       - image: circleci/python:3.8.1
     steps:
@@ -14,6 +14,8 @@ jobs:
           name: Upload coverage to codecov
           command: codecov -t 0a652abc-deea-4a9b-a31f-e0c564f121e1
   publish:
+    docker:
+      - image: circleci/python:3.8.1
     filters:
       branches:
         only: master
