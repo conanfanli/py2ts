@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  pypi: pennlabs/pypi-tools@0.0.3
-
 jobs:
   test:  # required for runs that don't use workflows
     docker:
@@ -22,6 +19,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Init .pypirc file
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+      - run:
           command: make publish
 
 workflows:
@@ -29,7 +32,7 @@ workflows:
   build:
     jobs:
       - test
-      - pypi/publish:
+      - publish:
           requires:
             - test
           filters:
