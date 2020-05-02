@@ -1,11 +1,11 @@
 from .exceptions import UnknowFieldType as UnknowFieldType
 from dataclasses import Field
 from enum import Enum
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Optional, Type
 
 class Undefined: ...
 
-def is_subclass(obj: Any, cls: Any): ...
+def check_is_subclass(obj: Any, cls: Any) -> Optional[bool]: ...
 def is_field_required(field: Field) -> bool: ...
 
 TYPE_MAP: Any

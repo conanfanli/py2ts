@@ -13,7 +13,7 @@ with open(path.join(here, "README.rst"), encoding="utf-8") as f:
 
 setup(
     name="py2ts",
-    version="0.0.2",
+    version="0.0.3",
     description="Python type code generator",
     long_description=long_description,
     url="https://github.com/conanfanli/py2ts",
