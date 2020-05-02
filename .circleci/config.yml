@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  test:  # required for runs that don't use workflows
+  test:
     docker:
       - image: circleci/python:3.8.1
     steps:
@@ -19,11 +19,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Init .pypirc file
+          name: Input credential in .pypirc file
           command: |
-            echo -e "[pypi]" >> ~/.pypirc
-            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
-            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+            echo -e "[pypi]" >> .pypirc
+            echo -e "username = $PYPI_USERNAME" >> .pypirc
+            echo -e "password = $PYPI_PASSWORD" >> .pypirc
             pip install twine
       - run:
           command: make publish
