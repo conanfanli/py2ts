@@ -24,7 +24,7 @@ def get_service_registry_code(class_module_map: Dict[str, str]) -> str:
         )
 
     imports_code = "\n".join(imports)
-    services_code = "\n    ".join(services)
+    services_code = "\n    ".join(sorted(services))
     return f"""
 # Generated code. DO NOT EDIT!
 

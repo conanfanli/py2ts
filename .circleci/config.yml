@@ -19,6 +19,8 @@ jobs:
     steps:
       - checkout
       - run:
+          ./check_version_bump.sh
+      - run:
           name: Input credential in .pypirc file
           command: |
             echo -e "username = $PYPI_USERNAME" >> .pypirc

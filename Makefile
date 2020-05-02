@@ -34,3 +34,7 @@ lint:
 	black . --check
 	mypy .
 	isort -c
+
+.PHONY: check-version-bump
+check-version-bump:
+	./check_version_bump.sh

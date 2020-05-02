@@ -5,6 +5,8 @@ from os import path
 
 from setuptools import find_packages, setup
 
+from py2ts import VERSION
+
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
@@ -13,7 +15,7 @@ with open(path.join(here, "README.rst"), encoding="utf-8") as f:
 
 setup(
     name="py2ts",
-    version="0.0.3",
+    version=VERSION,
     description="Python type code generator",
     long_description=long_description,
     url="https://github.com/conanfanli/py2ts",
