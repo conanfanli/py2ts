@@ -19,7 +19,7 @@ jobs:
     steps:
       - checkout
       - run:
-          ./check_version_bump.sh
+          bash ./check_version_bump.sh
       - run:
           name: Input credential in .pypirc file
           command: |

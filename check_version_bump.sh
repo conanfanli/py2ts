@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 PYPI_VERSION=`pip search py2ts| grep '\d+\.\d+.\d+' -E -o`
 LOCAL_VERSION=`cat py2ts/__init__.py | grep '\d+\.\d+.\d+' -E -o`
