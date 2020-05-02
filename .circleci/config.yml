@@ -13,4 +13,12 @@ jobs:
       - run:
           name: Upload coverage to codecov
           command: codecov -t 0a652abc-deea-4a9b-a31f-e0c564f121e1
+  publish:
+    filters:
+      branches:
+        only: master
+    steps:
+      - checkout
+      - run:
+          command: make publish
 
