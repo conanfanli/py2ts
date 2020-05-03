@@ -49,7 +49,7 @@ service_registry = ServiceRegistry()
 def get_class_module_map() -> Dict[str, str]:
     class_module_map = {}
     result = subprocess.run(
-        f"rg '^class \\w+Service[\\(:]'", shell=True, capture_output=True,
+        f"rg '^class \\w+Service[\\(:]' -t py", shell=True, capture_output=True,
     )
 
     # Command successful
