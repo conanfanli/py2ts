@@ -94,4 +94,32 @@ Generate boilerplate service registry code.
 Usage
 -----
 
-``python -m py2ts.generate_service_registry``
+``python -m py2ts.generate_service_registry > service_registery.py``
+
+How it works
+------------
+
+The command assumes that any classes named ``XXXService`` should be included in the service registry.
+For example:
+
+.. code-block:: python
+
+   class TestService:
+       pass
+
+will generate the following code:
+
+.. code-block:: python
+
+   # Generated code. DO NOT EDIT!
+
+   from dataclasses import dataclass
+
+   from tests.test_generate_service_registr import TestService
+
+
+   @dataclass
+   class ServiceRegistry:
+       test_service: TestService = TestService()
+
+   service_registry = ServiceRegistry()
