@@ -83,3 +83,15 @@ The output is:
      nullable_nested_field: NestedSchema | null;
      nested_list_field: Array<NestedSchema>;
    }
+
+Generate service registry
+=========================
+
+Dependency: `ripgrep <https://github.com/BurntSushi/ripgrep>`_
+
+Generate boilerplate service registry code.
+
+Usage
+-----
+
+``python -m py2ts.generate_service_registry``

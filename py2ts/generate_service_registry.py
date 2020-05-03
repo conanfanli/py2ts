@@ -1,7 +1,12 @@
 #!/usr/bin/env python
+import logging
 import re
 import subprocess
+import sys
 from typing import Dict
+
+logger = logging.getLogger("py2ts.generate_service_registry")
+logging.basicConfig(level=logging.INFO)
 
 
 class RipgrepError(Exception):
@@ -51,7 +56,7 @@ def get_class_module_map() -> Dict[str, str]:
     if result.returncode == 0:
         # E.g., ['smartcat/services.py:class TrainingDataSetService:', 'smartcat/services.py:class SmartCatService:']
         outputs = result.stdout.decode("utf-8").strip().split("\n")
-        print("Output of rg:", outputs)
+        logger.info(f"Output of rg:{outputs}")
         for output in outputs:
             # E.g., smartcat/services.py-class SmartCatService:
             file_path, class_name = output.rstrip(":").split(":class ")
@@ -59,17 +64,19 @@ def get_class_module_map() -> Dict[str, str]:
             assert class_name not in class_module_map, f"Found duplicate {class_name}"
             class_module_map[class_name] = module
 
-    elif result.returncode > 1:
+    elif result.returncode >= 1:
         # resultcode of 1 means no matches were found
         raise RipgrepError(
-            "Got code: {result.returncode} with message: {result.stderr!r}"
+            f"Got code: {result.returncode} with message {result.stderr!r}"
         )
 
     return class_module_map
 
 
 if __name__ == "__main__":
-    code = get_service_registry_code(get_class_module_map())
-    print(code)
-    with open("registries/service_registry.py", "w") as f:
-        f.write(code)
+    try:
+        code = get_service_registry_code(get_class_module_map())
+        print(code)
+    except RipgrepError as e:
+        logger.error(e)
+        sys.exit(1)

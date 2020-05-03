@@ -66,3 +66,12 @@ export interface ComplexSchema {
   nested_list_field: Array<NestedSchema>;
 }
 ```
+
+# Generate service registry
+Dependency: [ripgrep](https://github.com/BurntSushi/ripgrep)
+
+Generate boilerplate service registry code.
+
+## Usage
+`python -m py2ts.generate_service_registry`
+
