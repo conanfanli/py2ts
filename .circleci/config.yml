@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - run:
-          command: apt-get install ripgrep
+          command: sudo apt-get install ripgrep
       - run:
           command: pip install -r dev-requirements.txt
       - run:
