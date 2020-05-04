@@ -49,7 +49,9 @@ service_registry = ServiceRegistry()
 def get_class_module_map() -> Dict[str, str]:
     class_module_map = {}
     result = subprocess.run(
-        f"rg '^class \\w+Service[\\(:]' -t py", shell=True, capture_output=True,
+        f"rg '^(class \\w+Service)[\\(:]' -t py -o -r '$1'",
+        shell=True,
+        capture_output=True,
     )
 
     # Command successful
@@ -58,8 +60,8 @@ def get_class_module_map() -> Dict[str, str]:
         outputs = result.stdout.decode("utf-8").strip().split("\n")
         logger.info(f"Output of rg:{outputs}")
         for output in outputs:
-            # E.g., smartcat/services.py-class SmartCatService:
-            file_path, class_name = output.rstrip(":").split(":class ")
+            # E.g., smartcat/services.py-class SmartCatService
+            file_path, class_name = output.split(":class ")
             module = file_path.split(".py")[0].replace("/", ".")
             assert class_name not in class_module_map, f"Found duplicate {class_name}"
             class_module_map[class_name] = module
