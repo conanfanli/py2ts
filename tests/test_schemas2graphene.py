@@ -32,7 +32,7 @@ class Enum2TsTestCase(unittest.TestCase):
     @property
     def snapshot_path(self) -> str:
         prefix, _ = __file__.rsplit(".", maxsplit=1)
-        return f"{prefix}__snapshot.ts"
+        return f"{prefix}__snapshot.py"
 
     def read_snapshot(self) -> str:
         with open(self.snapshot_path) as f:
@@ -46,7 +46,7 @@ class Enum2TsTestCase(unittest.TestCase):
     def test_schemas2typescript(self) -> None:
         blocks = []
         for path, node in schemas2graphene([ComplexSchema]).items():
-            blocks.append(node.to_typescript())
+            blocks.append(node.to_graphene())
 
         # self.updateSnapshot(blocks)
         assert "\n".join(blocks) == self.read_snapshot()

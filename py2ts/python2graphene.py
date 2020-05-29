@@ -69,7 +69,7 @@ class Node:
     def path(self) -> str:
         return f"{self.schema.__module__}.{self.schema.__name__}"
 
-    def to_typescript(self) -> str:
+    def to_graphene(self) -> str:
         if is_dataclass(self.schema):
             return dataclass2interface(self.schema)
 
@@ -87,7 +87,7 @@ class Node:
         return deps
 
     def __repr__(self) -> str:
-        return self.to_typescript()
+        return self.to_graphene()
 
 
 def get_field_dependencies(typing_type: type) -> List[Node]:
