@@ -136,7 +136,7 @@ def python_type_to_graphene(typing_type: type) -> str:
 
     if getattr(typing_type, "__origin__", None) in [list, List]:
         args = getattr(typing_type, "__args__")
-        return "Array<{}>".format(python_type_to_graphene(args[0]))
+        return "graphene.List({})".format(python_type_to_graphene(args[0]))
 
     if getattr(typing_type, "__origin__", None) == Union:
         args = getattr(typing_type, "__args__")
