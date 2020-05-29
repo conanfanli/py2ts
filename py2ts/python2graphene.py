@@ -116,9 +116,9 @@ def get_field_dependencies(typing_type: type) -> List[Node]:
     return []
 
 
-def python_type_graphene(typing_type: type) -> str:
+def python_type_to_graphene(typing_type: type) -> str:
     """
-    >>> python_type_to_typescript(str)
+    >>> python_type_to_graphene(str)
     'string'
     """
     if typing_type in TYPE_MAP:
@@ -136,11 +136,11 @@ def python_type_graphene(typing_type: type) -> str:
 
     if getattr(typing_type, "__origin__", None) in [list, List]:
         args = getattr(typing_type, "__args__")
-        return "Array<{}>".format(python_type_to_typescript(args[0]))
+        return "Array<{}>".format(python_type_to_graphene(args[0]))
 
     if getattr(typing_type, "__origin__", None) == Union:
         args = getattr(typing_type, "__args__")
-        return " | ".join(python_type_to_typescript(arg) for arg in args)
+        return " | ".join(python_type_to_graphene(arg) for arg in args)
 
     if isinstance(typing_type, ForwardRef):
         return typing_type.__forward_arg__
@@ -153,7 +153,7 @@ def python_type_graphene(typing_type: type) -> str:
 
 def field_to_typescript(field: Field) -> str:
     try:
-        return python_type_to_typescript(field.type) + ";"
+        return python_type_to_graphene(field.type) + ";"
     except UnknowFieldType as e:
         raise UnknowFieldType(f"{field.name}: {e}")
 
@@ -171,7 +171,7 @@ def traverse(node: Node, visited: Dict[str, Node]):
     visited[node.path] = node
 
 
-def schemas2typescript(schemas: List) -> Dict[str, Node]:
+def schemas2graphene(schemas: List) -> Dict[str, Node]:
     """
     Args:
         schemas: A list of dataclass schemas or Enum
