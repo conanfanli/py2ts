@@ -43,13 +43,13 @@ TYPE_MAP = {
 def dataclass2graphene(schema) -> str:
     interface_body = "\n".join(
         [
-            f"  {field.name} = graphene.{field_to_graphene(field)}(required=True)"
+            f"   {field.name} = graphene.{field_to_graphene(field)}(required=True)"
             if is_field_required(field)
-            else f"  {field.name} = graphene.{field_to_graphene(field)}(required=False)"
+            else f"   {field.name} = graphene.{field_to_graphene(field)}(required=False)"
             for field in dataclasses.fields(schema)
         ]
     )
-    return f"class {schema.__name__} {{\n{interface_body}\n}}"
+    return f"class {schema.__name__}(graphene.ObjectType):\n{interface_body}"
 
 
 class Node:
@@ -131,8 +131,8 @@ def python_type_to_graphene(typing_type: type) -> str:
     if is_dataclass(typing_type):
         return typing_type.__name__
 
-    if getattr(typing_type, "__name__", None) == "NoneType":
-        return "null"
+    # if getattr(typing_type, "__name__", None) == "NoneType":
+    #     return "null"
 
     if getattr(typing_type, "__origin__", None) in [list, List]:
         args = getattr(typing_type, "__args__")
@@ -140,7 +140,11 @@ def python_type_to_graphene(typing_type: type) -> str:
 
     if getattr(typing_type, "__origin__", None) == Union:
         args = getattr(typing_type, "__args__")
-        return " | ".join(python_type_to_graphene(arg) for arg in args)
+        return " | ".join(
+            python_type_to_graphene(arg)
+            for arg in args
+            if getattr(arg, "__name__", None) != "NoneType"
+        )
 
     if isinstance(typing_type, ForwardRef):
         return typing_type.__forward_arg__
@@ -153,7 +157,7 @@ def python_type_to_graphene(typing_type: type) -> str:
 
 def field_to_graphene(field: Field) -> str:
     try:
-        return python_type_to_graphene(field.type) + ";"
+        return python_type_to_graphene(field.type)
     except UnknowFieldType as e:
         raise UnknowFieldType(f"{field.name}: {e}")
 
