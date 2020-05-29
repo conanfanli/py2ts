@@ -40,16 +40,16 @@ TYPE_MAP = {
 }
 
 
-def dataclass2interface(schema) -> str:
+def dataclass2graphene(schema) -> str:
     interface_body = "\n".join(
         [
-            f"  {field.name}: {field_to_typescript(field)}"
+            f"  {field.name} = graphene.{field_to_graphene(field)}(required=True)"
             if is_field_required(field)
-            else f"  {field.name}?: {field_to_typescript(field)}"
+            else f"  {field.name} = graphene.{field_to_graphene(field)}(required=False)"
             for field in dataclasses.fields(schema)
         ]
     )
-    return "export interface {} {{\n{}\n}}".format(schema.__name__, interface_body)
+    return f"class {schema.__name__} {{\n{interface_body}\n}}"
 
 
 class Node:
@@ -71,7 +71,7 @@ class Node:
 
     def to_graphene(self) -> str:
         if is_dataclass(self.schema):
-            return dataclass2interface(self.schema)
+            return dataclass2graphene(self.schema)
 
         return enum_to_typescript(self.schema)
 
@@ -151,7 +151,7 @@ def python_type_to_graphene(typing_type: type) -> str:
     raise UnknowFieldType(f"Unknow type {typing_type}")
 
 
-def field_to_typescript(field: Field) -> str:
+def field_to_graphene(field: Field) -> str:
     try:
         return python_type_to_graphene(field.type) + ";"
     except UnknowFieldType as e:
