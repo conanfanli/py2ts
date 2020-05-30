@@ -85,7 +85,7 @@ class Node:
         if is_dataclass(self.schema):
             return dataclass2graphene(self.schema)
 
-        return enum_to_typescript(self.schema)
+        return enum_to_graphene(self.schema)
 
     def get_dependencies(self) -> List["Node"]:
         deps: List[Node] = []
@@ -183,9 +183,9 @@ def field_to_graphene_field(field: Field) -> str:
         raise UnknowFieldType(f"{field.name}: {e}")
 
 
-def enum_to_typescript(enum_class: Type[Enum]) -> str:
-    body = ",\n".join(f"  {member.name} = '{member.name}'" for member in enum_class)
-    return "export enum {} {{\n{}\n}}".format(enum_class.__name__, body)
+def enum_to_graphene(enum_class: Type[Enum]) -> str:
+    body = "\n".join(f"  {member.name} = '{member.name}'" for member in enum_class)
+    return "class {}(graphene.Enum):\n{}\n".format(enum_class.__name__, body)
 
 
 def traverse(node: Node, visited: Dict[str, Node]):
