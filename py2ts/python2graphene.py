@@ -61,7 +61,7 @@ def dataclass2graphene(schema) -> str:
             lines.append(f"    {field.name} = {field_to_graphene_field(field)}")
 
     class_body = "\n".join(lines)
-    return f"class {schema.__name__}(graphene.ObjectType):\n{class_body}"
+    return f"class {schema.__name__}(graphene.ObjectType):\n{class_body}\n"
 
 
 class Node:
@@ -130,9 +130,9 @@ def get_field_dependencies(typing_type: type) -> List[Node]:
 
 def python_type_to_graphene(typing_type: type) -> str:
     """
-    Convert a python type to graphene scalar type.
+    Convert a python type to graphene type.
     >>> python_type_to_graphene(str)
-    'string'
+    'graphene.String'
     """
     if typing_type in TYPE_MAP:
         return TYPE_MAP[typing_type]
@@ -152,12 +152,26 @@ def python_type_to_graphene(typing_type: type) -> str:
         return "graphene.List({})".format(python_type_to_graphene(args[0]))
 
     if getattr(typing_type, "__origin__", None) == Union:
-        args = getattr(typing_type, "__args__")
-        return " | ".join(
-            python_type_to_graphene(arg)
-            for arg in args
-            if getattr(arg, "__name__", None) != "NoneType"
-        )
+        union_types = [
+            ut
+            for ut in typing_type.__args__  # type: ignore
+            if getattr(ut, "__name__", None) != "NoneType"
+        ]
+        # When there's only 1 type in Union or Option[SomeType]
+        if len(union_types) == 1:
+            return " | ".join(
+                python_type_to_graphene(union_type) for union_type in union_types
+            )
+        else:
+            union_class_name = "Union" + "".join(
+                [ut.__name__.capitalize() for ut in union_types]
+            )
+            return union_class_name
+    #             return f"""
+    # class {union_class_name}:
+    #     class Meta:
+    #         pass
+    # """
 
     if isinstance(typing_type, ForwardRef):
         return typing_type.__forward_arg__

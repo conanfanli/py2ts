@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 import unittest
 
 from py2ts.python2graphene import schemas2graphene
@@ -25,6 +25,7 @@ class ComplexSchema:
     nullable_decimal_field: Optional[int]
     nullable_enum_field: Optional[EnumFruit]
     nullable_nested_field: Optional[NestedSchema]
+    union_field: Union[NestedSchema, int, str]
     nested_list_field: List[NestedSchema]
 
 
