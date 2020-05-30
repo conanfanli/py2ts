@@ -23,33 +23,45 @@ def check_is_subclass(obj, cls) -> Optional[bool]:
 
 
 def is_field_required(field: Field) -> bool:
-    return field.default is MISSING
+    # If field is a Unioned field with None being in the union
+    field_type = field.type
+    if getattr(field_type, "__origin__", None) == Union:
+        args = field_type.__args__
+        for arg in args:
+            if getattr(arg, "__name__", None) == "NoneType":
+                return False
+
+    # If default value is not provided, field is required
+    if field.default is MISSING:
+        return True
+    else:
+        return False
 
 
 TYPE_MAP = {
-    str: "String",
-    bool: "Boolean",
-    int: "Int",
-    Decimal: "String",
-    float: "Float",
-    datetime.datetime: "String",
-    datetime.date: "String",
-    dict: "JSONString",
-    Any: "JSONString",
-    list: "List",
+    str: "graphene.String",
+    bool: "graphene.Boolean",
+    int: "graphene.Int",
+    Decimal: "graphene.String",
+    float: "graphene.Float",
+    datetime.datetime: "graphene.String",
+    datetime.date: "graphene.String",
+    dict: "graphene.ObjectType",
+    Any: "graphene.ObjectType",
+    list: "graphene.List",
 }
 
 
 def dataclass2graphene(schema) -> str:
-    interface_body = "\n".join(
-        [
-            f"   {field.name} = graphene.{field_to_graphene(field)}(required=True)"
-            if is_field_required(field)
-            else f"   {field.name} = graphene.{field_to_graphene(field)}(required=False)"
-            for field in dataclasses.fields(schema)
-        ]
-    )
-    return f"class {schema.__name__}(graphene.ObjectType):\n{interface_body}"
+    lines = []
+    for field in dataclasses.fields(schema):
+        if is_field_required(field):
+            lines.append(f"   {field.name} = {field_to_graphene_field(field)}")
+        else:
+            lines.append(f"   {field.name} = {field_to_graphene_field(field)}")
+
+    class_body = "\n".join(lines)
+    return f"class {schema.__name__}(graphene.ObjectType):\n{class_body}"
 
 
 class Node:
@@ -118,6 +130,7 @@ def get_field_dependencies(typing_type: type) -> List[Node]:
 
 def python_type_to_graphene(typing_type: type) -> str:
     """
+    Convert a python type to graphene scalar type.
     >>> python_type_to_graphene(str)
     'string'
     """
@@ -155,9 +168,17 @@ def python_type_to_graphene(typing_type: type) -> str:
     raise UnknowFieldType(f"Unknow type {typing_type}")
 
 
-def field_to_graphene(field: Field) -> str:
+def field_to_graphene_field(field: Field) -> str:
+    """Wrap field with graphene.Field"""
     try:
-        return python_type_to_graphene(field.type)
+        if is_field_required(field):
+            return (
+                f"graphene.Field({python_type_to_graphene(field.type)}, required=True)"
+            )
+        else:
+            return (
+                f"graphene.Field({python_type_to_graphene(field.type)}, required=False)"
+            )
     except UnknowFieldType as e:
         raise UnknowFieldType(f"{field.name}: {e}")
 
