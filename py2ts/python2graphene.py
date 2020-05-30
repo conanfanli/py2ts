@@ -56,9 +56,9 @@ def dataclass2graphene(schema) -> str:
     lines = []
     for field in dataclasses.fields(schema):
         if is_field_required(field):
-            lines.append(f"   {field.name} = {field_to_graphene_field(field)}")
+            lines.append(f"    {field.name} = {field_to_graphene_field(field)}")
         else:
-            lines.append(f"   {field.name} = {field_to_graphene_field(field)}")
+            lines.append(f"    {field.name} = {field_to_graphene_field(field)}")
 
     class_body = "\n".join(lines)
     return f"class {schema.__name__}(graphene.ObjectType):\n{class_body}"

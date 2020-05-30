@@ -1,4 +1,6 @@
-from typing import Dict
+from typing import Any, Dict
+
+logger: Any
 
 class RipgrepError(Exception): ...
 
