@@ -14,6 +14,29 @@ class Undefined:
     pass
 
 
+def parse_union_type(typing_type: type) -> str:
+    """
+    typing_type: str, int, typing.Union[int, str] ...
+    """
+    assert getattr(typing_type, "__origin__", None) == Union
+
+    non_null_types = [
+        ut
+        for ut in typing_type.__args__  # type: ignore
+        if getattr(ut, "__name__", None) != "NoneType"
+    ]
+    # When there's only 1 type in Union or Option[SomeType]
+    if len(non_null_types) == 1:
+        return "".join(
+            python_type_to_graphene(union_type) for union_type in non_null_types
+        )
+    else:
+        union_class_name = "Union" + "".join(
+            [ut.__name__.capitalize() for ut in non_null_types]
+        )
+        return union_class_name
+
+
 def check_is_subclass(obj, cls) -> Optional[bool]:
     """Call issubclass without raising exceptions."""
     try:
@@ -65,6 +88,8 @@ def dataclass2graphene(schema) -> str:
 
 
 class Node:
+    """Represent a type that is a dataclass, enum"""
+
     def __init__(self, schema) -> None:
         if is_dataclass(schema):
             self.is_dataclass = True
@@ -103,6 +128,7 @@ class Node:
 
 
 def get_field_dependencies(typing_type: type) -> List[Node]:
+    """Given a field type, return the list of nodes it depends on."""
     if is_dataclass(typing_type) or check_is_subclass(typing_type, Enum):
         return [Node(typing_type)]
 
@@ -118,12 +144,13 @@ def get_field_dependencies(typing_type: type) -> List[Node]:
             raise Exception(f"Type is: {typing_type}") from e
 
     if getattr(typing_type, "__origin__", None) == Union:
-        args = getattr(typing_type, "__args__")
-        return [
+        # Find nested types by filtering for dataclasses and enums
+        nested_types = [
             Node(arg)
-            for arg in args
+            for arg in typing_type.__args__  # type: ignore
             if is_dataclass(arg) or check_is_subclass(arg, Enum)
         ]
+        return nested_types
 
     return []
 
@@ -152,21 +179,7 @@ def python_type_to_graphene(typing_type: type) -> str:
         return "graphene.List({})".format(python_type_to_graphene(args[0]))
 
     if getattr(typing_type, "__origin__", None) == Union:
-        union_types = [
-            ut
-            for ut in typing_type.__args__  # type: ignore
-            if getattr(ut, "__name__", None) != "NoneType"
-        ]
-        # When there's only 1 type in Union or Option[SomeType]
-        if len(union_types) == 1:
-            return " | ".join(
-                python_type_to_graphene(union_type) for union_type in union_types
-            )
-        else:
-            union_class_name = "Union" + "".join(
-                [ut.__name__.capitalize() for ut in union_types]
-            )
-            return union_class_name
+        return parse_union_type(typing_type)
     #             return f"""
     # class {union_class_name}:
     #     class Meta:
