@@ -139,8 +139,10 @@ class Node:
         if self.is_dataclass:
             return dataclass2graphene(self.schema)
         elif self.is_enum:
+            assert not isinstance(self.schema, list)
             return enum_to_graphene(self.schema)
 
+        assert isinstance(self.schema, list)
         union_class_name = self.union_class_name
         types = ", ".join([t.__name__ for t in self.schema])
         return f"""
@@ -154,14 +156,20 @@ class {union_class_name}:
         if self.is_dataclass:
             for field in dataclasses.fields(self.schema):
                 deps += get_field_dependencies(field.type)
-        else:
+
+            return deps
+        elif self.is_enum:
             # Naively handle Enum dependencies
-            deps = []
+            return []
+
+        assert self.is_union and isinstance(self.schema, list), self.schema
+        for tp in self.schema:
+            deps += get_field_dependencies(tp)
 
         return deps
 
     def __repr__(self) -> str:
-        return self.to_graphene()
+        return f"Node<<{self.to_graphene()}>>"
 
 
 def get_field_dependencies(typing_type: type) -> List[Node]:
@@ -196,7 +204,6 @@ def get_field_dependencies(typing_type: type) -> List[Node]:
             ]
         else:
             ret = [Node(non_null_types)]
-        print(typing_type, ret)
         return ret
 
     return []
@@ -258,6 +265,7 @@ def enum_to_graphene(enum_class: Type[Enum]) -> str:
 
 
 def traverse(node: Node, visited: Dict[str, Node]):
+    # print(node, "->", node.get_dependencies(), "\n\n")
     for dep in node.get_dependencies():
         if dep.path not in visited:
             traverse(dep, visited)
