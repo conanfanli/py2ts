@@ -50,14 +50,6 @@ def parse_union_type(typing_type: type) -> Tuple[bool, str]:
     return is_required, graphene_type
 
 
-def check_is_subclass(obj, cls) -> Optional[bool]:
-    """Call issubclass without raising exceptions."""
-    try:
-        return issubclass(obj, cls)
-    except TypeError:
-        return None
-
-
 def is_field_required(field: Field) -> bool:
     # If field is a Unioned field with None being in the union
     field_type = field.type
@@ -69,6 +61,14 @@ def is_field_required(field: Field) -> bool:
         return True
     else:
         return False
+
+
+def check_is_subclass(obj, cls) -> Optional[bool]:
+    """Call issubclass without raising exceptions."""
+    try:
+        return issubclass(obj, cls)
+    except TypeError:
+        return None
 
 
 TYPE_MAP = {
@@ -100,27 +100,54 @@ def dataclass2graphene(schema) -> str:
 class Node:
     """Represent a type that is a dataclass, enum"""
 
-    def __init__(self, schema) -> None:
-        if is_dataclass(schema):
-            self.is_dataclass = True
-            self.is_enum = False
-        elif check_is_subclass(schema, Enum):
-            self.is_dataclass = False
-            self.is_enum = True
-        else:
-            raise Exception(f"{schema} is neither Enum or dataclass")
-
+    def __init__(self, schema: Union[type, List[type]]) -> None:
         self.schema = schema
+        assert (
+            self.is_dataclass or self.is_enum or self.is_union
+        ), f"{schema} is invalid"
+
+    @property
+    def is_union(self) -> bool:
+        return isinstance(self.schema, list)
+
+    @property
+    def is_dataclass(self) -> bool:
+        return is_dataclass(self.schema)
+
+    @property
+    def is_enum(self) -> bool:
+        return bool(check_is_subclass(self.schema, Enum))
+
+    @property
+    def union_class_name(self) -> str:
+        assert self.is_union
+        assert isinstance(self.schema, list)
+        union_class_name = "Union" + "".join(
+            [ut.__name__.capitalize() for ut in self.schema]
+        )
+        return union_class_name
 
     @property
     def path(self) -> str:
-        return f"{self.schema.__module__}.{self.schema.__name__}"
+        if not self.is_union:
+            assert not isinstance(self.schema, list)
+            return f"{self.schema.__module__}.{self.schema.__name__}"
+
+        return self.union_class_name
 
     def to_graphene(self) -> str:
-        if is_dataclass(self.schema):
+        if self.is_dataclass:
             return dataclass2graphene(self.schema)
+        elif self.is_enum:
+            return enum_to_graphene(self.schema)
 
-        return enum_to_graphene(self.schema)
+        union_class_name = self.union_class_name
+        types = ", ".join([t.__name__ for t in self.schema])
+        return f"""
+class {union_class_name}:
+    class Meta:
+        types= ({types})
+    """
 
     def get_dependencies(self) -> List["Node"]:
         deps: List[Node] = []
@@ -155,12 +182,22 @@ def get_field_dependencies(typing_type: type) -> List[Node]:
 
     if getattr(typing_type, "__origin__", None) == Union:
         # Find nested types by filtering for dataclasses and enums
-        nested_types = [
-            Node(arg)
+        non_null_types = [
+            arg
             for arg in typing_type.__args__  # type: ignore
-            if is_dataclass(arg) or check_is_subclass(arg, Enum)
+            # if is_dataclass(arg) or check_is_subclass(arg, Enum)
+            if getattr(arg, "__name__", None) != "NoneType"
         ]
-        return nested_types
+        if len(non_null_types) == 1:
+            ret = [
+                Node(arg)
+                for arg in non_null_types
+                if is_dataclass(arg) or check_is_subclass(arg, Enum)
+            ]
+        else:
+            ret = [Node(non_null_types)]
+        print(typing_type, ret)
+        return ret
 
     return []
 
@@ -190,11 +227,6 @@ def python_type_to_graphene(typing_type: type) -> str:
 
     if getattr(typing_type, "__origin__", None) == Union:
         return parse_union_type(typing_type)[1]
-    #             return f"""
-    # class {union_class_name}:
-    #     class Meta:
-    #         pass
-    # """
 
     if isinstance(typing_type, ForwardRef):
         return typing_type.__forward_arg__
