@@ -146,7 +146,7 @@ class Node:
         union_class_name = self.union_class_name
         types = ", ".join([t.__name__ for t in self.schema])
         return f"""
-class {union_class_name}:
+class {union_class_name}(graphene.Union):
     class Meta:
         types= ({types})
     """
