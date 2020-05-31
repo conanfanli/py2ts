@@ -4,7 +4,7 @@ from dataclasses import MISSING, Field, is_dataclass
 import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 from typing import ForwardRef  # type: ignore
 
 from .exceptions import UnknowFieldType
@@ -14,27 +14,40 @@ class Undefined:
     pass
 
 
-def parse_union_type(typing_type: type) -> str:
+def parse_union_type(typing_type: type) -> Tuple[bool, str]:
     """
     typing_type: str, int, typing.Union[int, str] ...
     """
     assert getattr(typing_type, "__origin__", None) == Union
+
+    is_required = True
+    graphene_type = ""
+    # If the field is optional (Union[None, ...])
+    if any(
+        [
+            ut
+            for ut in typing_type.__args__  # type: ignore
+            if getattr(ut, "__name__", None) == "NoneType"
+        ]
+    ):
+        is_required = False
 
     non_null_types = [
         ut
         for ut in typing_type.__args__  # type: ignore
         if getattr(ut, "__name__", None) != "NoneType"
     ]
+
     # When there's only 1 type in Union or Option[SomeType]
     if len(non_null_types) == 1:
-        return "".join(
-            python_type_to_graphene(union_type) for union_type in non_null_types
-        )
+        graphene_type = python_type_to_graphene(non_null_types[0])
     else:
         union_class_name = "Union" + "".join(
             [ut.__name__.capitalize() for ut in non_null_types]
         )
-        return union_class_name
+        graphene_type = union_class_name
+
+    return is_required, graphene_type
 
 
 def check_is_subclass(obj, cls) -> Optional[bool]:
@@ -49,10 +62,7 @@ def is_field_required(field: Field) -> bool:
     # If field is a Unioned field with None being in the union
     field_type = field.type
     if getattr(field_type, "__origin__", None) == Union:
-        args = field_type.__args__
-        for arg in args:
-            if getattr(arg, "__name__", None) == "NoneType":
-                return False
+        return parse_union_type(field_type)[0]
 
     # If default value is not provided, field is required
     if field.default is MISSING:
@@ -179,7 +189,7 @@ def python_type_to_graphene(typing_type: type) -> str:
         return "graphene.List({})".format(python_type_to_graphene(args[0]))
 
     if getattr(typing_type, "__origin__", None) == Union:
-        return parse_union_type(typing_type)
+        return parse_union_type(typing_type)[1]
     #             return f"""
     # class {union_class_name}:
     #     class Meta:
